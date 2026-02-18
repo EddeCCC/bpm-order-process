@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Web Modeler" exporterVersion="dd3b335" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:modeler="http://camunda.org/schema/modeler/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Web Modeler" exporterVersion="dd3b335" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.9.0">
   <bpmn:process id="OrderProcess" name="order-process" isExecutable="true">
-    <bpmn:extensionElements />
+    <bpmn:extensionElements>
+      <zeebe:versionTag value="1.0" />
+    </bpmn:extensionElements>
     <bpmn:startEvent id="StartEvent_OrderReceived" name="Order received">
+      <bpmn:extensionElements>
+        <zeebe:ioMapping>
+          <zeebe:output source="=50" target="price" />
+        </zeebe:ioMapping>
+      </bpmn:extensionElements>
       <bpmn:outgoing>Flow_15onil7</bpmn:outgoing>
     </bpmn:startEvent>
-    <bpmn:endEvent id="EndEvent_OrderRejected" name="Order rejected">
+    <bpmn:endEvent id="EndEvent_OrderRejected" name="Order cancelled">
       <bpmn:incoming>Flow_0nghy12</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:exclusiveGateway id="Gateway_1nkokpu" name="Check order price" default="Flow_1fnhh73">
@@ -15,43 +22,75 @@
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_15onil7" sourceRef="StartEvent_OrderReceived" targetRef="Gateway_1nkokpu" />
     <bpmn:sequenceFlow id="Flow_1fnhh73" name="&#62;= 100" sourceRef="Gateway_1nkokpu" targetRef="Task_ApproveOrder" />
-    <bpmn:sequenceFlow id="Flow_0xie56j" name="&#60; 100" sourceRef="Gateway_1nkokpu" targetRef="Task_HandlePayment">
+    <bpmn:sequenceFlow id="Flow_0xie56j" name="&#60; 100" sourceRef="Gateway_1nkokpu" targetRef="Gateway_1dbc216">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=price &lt; 100</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:userTask id="Task_ApproveOrder" name="Approve order">
       <bpmn:extensionElements>
         <zeebe:userTask />
+        <zeebe:assignmentDefinition candidateGroups="costManagement" />
+        <zeebe:formDefinition formId="Form_ApproveOrder" />
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_1fnhh73</bpmn:incoming>
       <bpmn:outgoing>Flow_1ywohx5</bpmn:outgoing>
     </bpmn:userTask>
-    <bpmn:exclusiveGateway id="Gateway_ApproveResult" name="Result?" default="Flow_0nghy12">
+    <bpmn:exclusiveGateway id="Gateway_ApproveResult" name="Approved?" default="Flow_0nghy12">
       <bpmn:incoming>Flow_1ywohx5</bpmn:incoming>
       <bpmn:outgoing>Flow_0nghy12</bpmn:outgoing>
       <bpmn:outgoing>Flow_1f20d2a</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:sequenceFlow id="Flow_1ywohx5" sourceRef="Task_ApproveOrder" targetRef="Gateway_ApproveResult" />
     <bpmn:serviceTask id="Task_HandlePayment" name="Handle payment">
-      <bpmn:incoming>Flow_0xie56j</bpmn:incoming>
-      <bpmn:outgoing>Flow_0z8lnrt</bpmn:outgoing>
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="handlePayment" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0nm25j8</bpmn:incoming>
+      <bpmn:outgoing>Flow_0fbyuha</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_OrderCompleted" name="Order completed">
-      <bpmn:incoming>Flow_0d4xhst</bpmn:incoming>
+      <bpmn:incoming>Flow_0fbyuha</bpmn:incoming>
+      <bpmn:incoming>Flow_19qiey4</bpmn:incoming>
     </bpmn:endEvent>
-    <bpmn:sequenceFlow id="Flow_0nghy12" name="Rejected" sourceRef="Gateway_ApproveResult" targetRef="EndEvent_OrderRejected" />
+    <bpmn:sequenceFlow id="Flow_0nghy12" name="No" sourceRef="Gateway_ApproveResult" targetRef="EndEvent_OrderRejected" />
     <bpmn:exclusiveGateway id="Gateway_1dbc216">
-      <bpmn:incoming>Flow_0z8lnrt</bpmn:incoming>
       <bpmn:incoming>Flow_1f20d2a</bpmn:incoming>
-      <bpmn:outgoing>Flow_0d4xhst</bpmn:outgoing>
+      <bpmn:incoming>Flow_0xie56j</bpmn:incoming>
+      <bpmn:outgoing>Flow_0nm25j8</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_0z8lnrt" sourceRef="Task_HandlePayment" targetRef="Gateway_1dbc216" />
-    <bpmn:sequenceFlow id="Flow_1f20d2a" name="Approved" sourceRef="Gateway_ApproveResult" targetRef="Gateway_1dbc216">
+    <bpmn:sequenceFlow id="Flow_1f20d2a" name="Yes" sourceRef="Gateway_ApproveResult" targetRef="Gateway_1dbc216">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=isApproved</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0d4xhst" sourceRef="Gateway_1dbc216" targetRef="EndEvent_OrderCompleted" />
+    <bpmn:sequenceFlow id="Flow_0nm25j8" sourceRef="Gateway_1dbc216" targetRef="Task_HandlePayment" />
+    <bpmn:sequenceFlow id="Flow_0fbyuha" sourceRef="Task_HandlePayment" targetRef="EndEvent_OrderCompleted" />
+    <bpmn:boundaryEvent id="Event_1pzb5rw" attachedToRef="Task_HandlePayment">
+      <bpmn:outgoing>Flow_1xyzhxx</bpmn:outgoing>
+      <bpmn:errorEventDefinition id="ErrorEventDefinition_033erxx" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_1xyzhxx" sourceRef="Event_1pzb5rw" targetRef="Task_ManuallyHandlePayment" />
+    <bpmn:userTask id="Task_ManuallyHandlePayment" name="Manually handle payment">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="Form_ManuallyHandlePayment" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1xyzhxx</bpmn:incoming>
+      <bpmn:outgoing>Flow_19qiey4</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:sequenceFlow id="Flow_19qiey4" sourceRef="Task_ManuallyHandlePayment" targetRef="EndEvent_OrderCompleted" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="OrderProcess">
+      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_OrderReceived">
+        <dc:Bounds x="72" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="55" y="143" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0zyra07_di" bpmnElement="EndEvent_OrderRejected">
+        <dc:Bounds x="922" y="32" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="901" y="13" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1nkokpu_di" bpmnElement="Gateway_1nkokpu" isMarkerVisible="true">
         <dc:Bounds x="255" y="93" width="50" height="50" />
         <bpmndi:BPMNLabel>
@@ -65,33 +104,28 @@
       <bpmndi:BPMNShape id="Gateway_1frp0ae_di" bpmnElement="Gateway_ApproveResult" isMarkerVisible="true">
         <dc:Bounds x="575" y="25" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="581" y="1" width="38" height="14" />
+          <dc:Bounds x="573" y="1" width="54" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_0d3x0nn_di" bpmnElement="Task_HandlePayment">
-        <dc:Bounds x="390" y="160" width="100" height="80" />
+        <dc:Bounds x="690" y="160" width="100" height="80" />
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0zyra07_di" bpmnElement="EndEvent_OrderRejected">
-        <dc:Bounds x="782" y="32" width="36" height="36" />
+      <bpmndi:BPMNShape id="Event_02mgo0c_di" bpmnElement="EndEvent_OrderCompleted">
+        <dc:Bounds x="922" y="182" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="765" y="75" width="71" height="14" />
+          <dc:Bounds x="899" y="158" width="82" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1dbc216_di" bpmnElement="Gateway_1dbc216" isMarkerVisible="true">
         <dc:Bounds x="575" y="175" width="50" height="50" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_02mgo0c_di" bpmnElement="EndEvent_OrderCompleted">
-        <dc:Bounds x="782" y="182" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="760" y="225" width="82" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="Activity_0tn9dl8_di" bpmnElement="Task_ManuallyHandlePayment">
+        <dc:Bounds x="690" y="310" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="_BPMNShape_StartEvent_2" bpmnElement="StartEvent_OrderReceived">
-        <dc:Bounds x="72" y="100" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="55" y="143" width="73" height="14" />
-        </bpmndi:BPMNLabel>
+      <bpmndi:BPMNShape id="Event_1pzb5rw_di" bpmnElement="Event_1pzb5rw">
+        <dc:Bounds x="722" y="222" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_15onil7_di" bpmnElement="Flow_15onil7">
         <di:waypoint x="108" y="118" />
@@ -108,9 +142,9 @@
       <bpmndi:BPMNEdge id="Flow_0xie56j_di" bpmnElement="Flow_0xie56j">
         <di:waypoint x="280" y="143" />
         <di:waypoint x="280" y="200" />
-        <di:waypoint x="390" y="200" />
+        <di:waypoint x="575" y="200" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="281" y="213" width="28" height="14" />
+          <dc:Bounds x="286" y="213" width="28" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1ywohx5_di" bpmnElement="Flow_1ywohx5">
@@ -119,25 +153,35 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_0nghy12_di" bpmnElement="Flow_0nghy12">
         <di:waypoint x="625" y="50" />
-        <di:waypoint x="782" y="50" />
+        <di:waypoint x="922" y="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="682" y="32" width="44" height="14" />
+          <dc:Bounds x="767" y="32" width="15" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0z8lnrt_di" bpmnElement="Flow_0z8lnrt">
-        <di:waypoint x="490" y="200" />
-        <di:waypoint x="575" y="200" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_1f20d2a_di" bpmnElement="Flow_1f20d2a">
         <di:waypoint x="600" y="75" />
         <di:waypoint x="600" y="175" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="616" y="122" width="48" height="14" />
+          <dc:Bounds x="611" y="111" width="18" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0d4xhst_di" bpmnElement="Flow_0d4xhst">
+      <bpmndi:BPMNEdge id="Flow_0nm25j8_di" bpmnElement="Flow_0nm25j8">
         <di:waypoint x="625" y="200" />
-        <di:waypoint x="782" y="200" />
+        <di:waypoint x="690" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0fbyuha_di" bpmnElement="Flow_0fbyuha">
+        <di:waypoint x="790" y="200" />
+        <di:waypoint x="922" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1xyzhxx_di" bpmnElement="Flow_1xyzhxx">
+        <di:waypoint x="740" y="258" />
+        <di:waypoint x="740" y="310" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19qiey4_di" bpmnElement="Flow_19qiey4">
+        <di:waypoint x="790" y="350" />
+        <di:waypoint x="870" y="350" />
+        <di:waypoint x="870" y="200" />
+        <di:waypoint x="922" y="200" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
