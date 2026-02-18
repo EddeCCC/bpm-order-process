@@ -1,0 +1,9 @@
+camunda:
+  client:
+    mode: saas
+    auth:
+      client-id: <cluster-id>
+      client-secret: <cluster-secret>
+      token-url: https://login.cloud.camunda.io/oauth/token
+    grpc-address: https://<cluster-id>.<region-id>.zeebe.camunda.io:443
+    rest-address: https://<region-id>.zeebe.camunda.io/<cluster-id>
