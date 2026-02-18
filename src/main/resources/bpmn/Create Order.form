@@ -1,0 +1,65 @@
+{
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Web Modeler",
+    "version": "dd3b335"
+  },
+  "schemaVersion": 19,
+  "id": "Form_CreateOrder",
+  "components": [
+    {
+      "text": "# Create Order",
+      "type": "text",
+      "layout": {
+        "row": "Row_1g7f6rr",
+        "columns": null
+      },
+      "id": "Field_0lx5hnd"
+    },
+    {
+      "label": "Email",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0zpyc9t",
+        "columns": null
+      },
+      "id": "Field_1frjx41",
+      "key": "email",
+      "validate": {
+        "validationType": "email",
+        "required": true
+      }
+    },
+    {
+      "label": "Product",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_13y90c5",
+        "columns": null
+      },
+      "id": "Field_0z1wcdz",
+      "key": "product",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Price",
+      "type": "number",
+      "layout": {
+        "row": "Row_10gaxoo",
+        "columns": null
+      },
+      "id": "Field_0cqaaco",
+      "key": "price",
+      "decimalDigits": 2,
+      "increment": "1",
+      "validate": {
+        "required": true,
+        "min": "1"
+      }
+    }
+  ],
+  "type": "default"
+}
