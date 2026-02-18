@@ -1,9 +1,8 @@
-package demo.camunda.order.service;
+package demo.camunda.order.payment;
 
 import io.camunda.client.CamundaClient;
 import io.camunda.client.annotation.JobWorker;
 import io.camunda.client.api.response.ActivatedJob;
-import io.camunda.client.api.worker.JobClient;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ public class PaymentService {
     }
 
     @JobWorker(type = "handlePayment")
-    public void handleJob(final JobClient client , final ActivatedJob job) {
+    public void handleJob(final ActivatedJob job) {
         Map<String, Object> inputVars = job.getVariablesAsMap();
         log.info("Input variables: {}", inputVars);
 
@@ -40,8 +39,8 @@ public class PaymentService {
     }
 
     private void service() {
-        boolean error = Math.random() < 0.9;
-        if(error) {
+        boolean error = Math.random() < 0.5;
+        if (error) {
             log.error("Payment failed");
             throw new RuntimeException("Service error");
         }
