@@ -32,7 +32,6 @@ public class PaymentService {
 
         try {
             service();
-            client.newCompleteCommand(job).send().join();
         } catch (Exception e) {
             client.newThrowErrorCommand(job).errorCode(ERROR_CODE).send().join();
         }
