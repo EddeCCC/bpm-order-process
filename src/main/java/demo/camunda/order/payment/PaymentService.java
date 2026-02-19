@@ -20,11 +20,6 @@ public class PaymentService {
     @Autowired
     private CamundaClient client;
 
-    @PostConstruct
-    void postConstruct() {
-        log.info("Connected to cluster: " + client.newTopologyRequest().send().join());
-    }
-
     @JobWorker(type = "handlePayment")
     public void handleJob(final ActivatedJob job) {
         Map<String, Object> inputVars = job.getVariablesAsMap();
