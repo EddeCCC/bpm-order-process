@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:zeebe="http://camunda.org/schema/zeebe/1.0" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:modeler="http://camunda.org/schema/modeler/1.0" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Web Modeler" exporterVersion="3e38ded" modeler:executionPlatform="Camunda Cloud" modeler:executionPlatformVersion="8.8.0">
+  <bpmn:process id="DistributorProcess" name="distributor-process" isExecutable="true">
+    <bpmn:startEvent id="StartEvent_ItemOrderReceived" name="Item order received">
+      <bpmn:extensionElements>
+        <zeebe:properties>
+          <zeebe:property name="camundaModeler:exampleOutputJson" value="{&#10;  &#34;orderId&#34;: 12345,&#10;  &#34;items&#34;:   [&#10;    {&#34;name&#34;:&#34;auto&#34;,&#34;unitPrice&#34;:400,&#34;quantity&#34;:2},&#10;    {&#34;name&#34;:&#34;boot&#34;,&#34;unitPrice&#34;:700,&#34;quantity&#34;:1}&#10;    ]&#10;}" />
+        </zeebe:properties>
+      </bpmn:extensionElements>
+      <bpmn:outgoing>Flow_1rvcmhh</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1o55zu7" messageRef="Message_075l24t" />
+    </bpmn:startEvent>
+    <bpmn:sequenceFlow id="Flow_1rvcmhh" sourceRef="StartEvent_ItemOrderReceived" targetRef="Task_CheckInventory" />
+    <bpmn:serviceTask id="Task_CheckInventory" name="Check inventory">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="checkInventory" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1rvcmhh</bpmn:incoming>
+      <bpmn:outgoing>Flow_18vq945</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:endEvent id="EndEvent_ItemOrderCompleted" name="Item order completed">
+      <bpmn:incoming>Flow_03u0gg3</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_18vq945" sourceRef="Task_CheckInventory" targetRef="Gateway_ItemsAvailable" />
+    <bpmn:exclusiveGateway id="Gateway_ItemsAvailable" name="Items available?" default="Flow_0kvr792">
+      <bpmn:incoming>Flow_18vq945</bpmn:incoming>
+      <bpmn:outgoing>Flow_0kvr792</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0rmdjra</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_0kvr792" name="Yes" sourceRef="Gateway_ItemsAvailable" targetRef="Gateway_09s07iq" />
+    <bpmn:sequenceFlow id="Flow_0rmdjra" name="No" sourceRef="Gateway_ItemsAvailable" targetRef="Task_ApproveReorder">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=not(isAvailable)</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:userTask id="Task_ApproveReorder" name="Approve reorder">
+      <bpmn:extensionElements>
+        <zeebe:userTask />
+        <zeebe:formDefinition formId="Form_ApproveReorder" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_0rmdjra</bpmn:incoming>
+      <bpmn:outgoing>Flow_06ten3g</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:exclusiveGateway id="Gateway_09s07iq">
+      <bpmn:incoming>Flow_0kvr792</bpmn:incoming>
+      <bpmn:incoming>Flow_06ten3g</bpmn:incoming>
+      <bpmn:outgoing>Flow_03u0gg3</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_03u0gg3" sourceRef="Gateway_09s07iq" targetRef="EndEvent_ItemOrderCompleted" />
+    <bpmn:sequenceFlow id="Flow_06ten3g" sourceRef="Task_ApproveReorder" targetRef="Gateway_09s07iq" />
+  </bpmn:process>
+  <bpmn:message id="Message_075l24t" name="Message_OrderItems" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="DistributorProcess">
+      <bpmndi:BPMNShape id="Event_1yrwshp_di" bpmnElement="StartEvent_ItemOrderReceived">
+        <dc:Bounds x="150" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="142" y="143" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1tuelxw_di" bpmnElement="Task_CheckInventory">
+        <dc:Bounds x="280" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_088fkm9_di" bpmnElement="EndEvent_ItemOrderCompleted">
+        <dc:Bounds x="812" y="100" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="804" y="143" width="54" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_02s83uz_di" bpmnElement="Gateway_ItemsAvailable" isMarkerVisible="true">
+        <dc:Bounds x="435" y="93" width="50" height="50" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="420" y="69" width="80" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1930lvo_di" bpmnElement="Task_ApproveReorder">
+        <dc:Bounds x="530" y="180" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_09s07iq_di" bpmnElement="Gateway_09s07iq" isMarkerVisible="true">
+        <dc:Bounds x="665" y="93" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_1rvcmhh_di" bpmnElement="Flow_1rvcmhh">
+        <di:waypoint x="186" y="118" />
+        <di:waypoint x="280" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_18vq945_di" bpmnElement="Flow_18vq945">
+        <di:waypoint x="380" y="118" />
+        <di:waypoint x="435" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0kvr792_di" bpmnElement="Flow_0kvr792">
+        <di:waypoint x="485" y="118" />
+        <di:waypoint x="665" y="118" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="566" y="100" width="18" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0rmdjra_di" bpmnElement="Flow_0rmdjra">
+        <di:waypoint x="460" y="143" />
+        <di:waypoint x="460" y="220" />
+        <di:waypoint x="530" y="220" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="442" y="179" width="15" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03u0gg3_di" bpmnElement="Flow_03u0gg3">
+        <di:waypoint x="715" y="118" />
+        <di:waypoint x="812" y="118" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_06ten3g_di" bpmnElement="Flow_06ten3g">
+        <di:waypoint x="630" y="220" />
+        <di:waypoint x="690" y="220" />
+        <di:waypoint x="690" y="143" />
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

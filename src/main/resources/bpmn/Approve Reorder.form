@@ -1,0 +1,92 @@
+{
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.8.0",
+  "exporter": {
+    "name": "Camunda Web Modeler",
+    "version": "3e38ded"
+  },
+  "schemaVersion": 19,
+  "id": "Form_ApproveReorder",
+  "components": [
+    {
+      "text": "# Approve Reorder",
+      "type": "text",
+      "layout": {
+        "row": "Row_1u95t3i",
+        "columns": null
+      },
+      "id": "Field_1qwfwz0"
+    },
+    {
+      "label": "Order Id",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0ln0olt",
+        "columns": null
+      },
+      "id": "Field_141jmdr",
+      "key": "orderId",
+      "readonly": true
+    },
+    {
+      "label": "Items",
+      "components": [
+        {
+          "label": "Name",
+          "type": "textfield",
+          "layout": {
+            "row": "Row_0r8veiv",
+            "columns": null
+          },
+          "id": "Field_0j1l86e",
+          "key": "name",
+          "readonly": true
+        },
+        {
+          "label": "Unit Price",
+          "type": "number",
+          "layout": {
+            "row": "Row_1xj5xwm",
+            "columns": null
+          },
+          "id": "Field_0rrzoga",
+          "key": "unitPrice",
+          "readonly": true
+        },
+        {
+          "label": "Quantity",
+          "type": "number",
+          "layout": {
+            "row": "Row_1xj5xwm",
+            "columns": null
+          },
+          "id": "Field_0bx21ih",
+          "key": "quantity",
+          "readonly": true
+        }
+      ],
+      "showOutline": true,
+      "isRepeating": true,
+      "allowAddRemove": false,
+      "defaultRepetitions": 1,
+      "type": "dynamiclist",
+      "layout": {
+        "row": "Row_0zaicjd",
+        "columns": null
+      },
+      "id": "Field_1k928us",
+      "path": "items"
+    },
+    {
+      "label": "Approve reorder",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_0q6qbku",
+        "columns": null
+      },
+      "id": "Field_0ouew7w",
+      "key": "reorderApproved"
+    }
+  ],
+  "type": "default"
+}

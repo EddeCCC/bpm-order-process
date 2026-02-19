@@ -6,10 +6,10 @@
     "version": "3e38ded"
   },
   "schemaVersion": 19,
-  "id": "Form_CreateOrder",
+  "id": "Form_ManuallyHandlePayment",
   "components": [
     {
-      "text": "# Create Order",
+      "text": "# Handle Payment",
       "type": "text",
       "layout": {
         "row": "Row_1g7f6rr",
@@ -18,10 +18,10 @@
       "id": "Field_0lx5hnd"
     },
     {
-      "label": "Client",
+      "label": "Billed to",
       "components": [
         {
-          "label": "Name",
+          "label": "Client Name",
           "type": "textfield",
           "layout": {
             "row": "Row_0bummca",
@@ -30,12 +30,12 @@
           "id": "Field_0euo34y",
           "key": "name",
           "validate": {
-            "required": true,
-            "minLength": 2
-          }
+            "required": true
+          },
+          "readonly": true
         },
         {
-          "label": "Email",
+          "label": "Client Email",
           "type": "textfield",
           "layout": {
             "row": "Row_0bummca",
@@ -46,7 +46,8 @@
           "validate": {
             "validationType": "email",
             "required": true
-          }
+          },
+          "readonly": true
         }
       ],
       "showOutline": true,
@@ -71,9 +72,9 @@
           "id": "Field_0z1wcdz",
           "key": "name",
           "validate": {
-            "required": true,
-            "minLength": "2"
-          }
+            "required": true
+          },
+          "readonly": true
         },
         {
           "label": "Unit Price",
@@ -89,7 +90,8 @@
           "validate": {
             "required": true,
             "min": "1"
-          }
+          },
+          "readonly": true
         },
         {
           "label": "Quantity",
@@ -100,18 +102,12 @@
           },
           "id": "Field_0n8oe94",
           "key": "quantity",
-          "defaultValue": 1,
-          "increment": "1",
-          "decimalDigits": 0,
-          "validate": {
-            "required": true,
-            "min": "1"
-          }
+          "readonly": true
         }
       ],
       "showOutline": true,
       "isRepeating": true,
-      "allowAddRemove": true,
+      "allowAddRemove": false,
       "defaultRepetitions": 1,
       "type": "dynamiclist",
       "layout": {
@@ -122,33 +118,25 @@
       "path": "items"
     },
     {
-      "computeOn": "change",
-      "type": "expression",
+      "label": "Comment",
+      "type": "textarea",
       "layout": {
-        "row": "Row_03w33sg",
+        "row": "Row_1gbzkb0",
         "columns": null
       },
-      "id": "Field_09g1uce",
-      "key": "orderVolume",
-      "expression": "=sum(for item in items return item.unitPrice * item.quantity)"
+      "id": "Field_0hpkd1j",
+      "key": "comment",
+      "readonly": true
     },
     {
-      "text": "Total order volume:",
-      "type": "text",
+      "label": "Handle payment",
+      "type": "checkbox",
       "layout": {
-        "row": "Row_0xg36q0",
-        "columns": 4
-      },
-      "id": "Field_0p3r9ho"
-    },
-    {
-      "content": "<pre><code>{{orderVolume}}</pre></code>",
-      "type": "html",
-      "layout": {
-        "row": "Row_0xg36q0",
+        "row": "Row_03w1aqr",
         "columns": null
       },
-      "id": "Field_0y2jnm5"
+      "id": "Field_178975c",
+      "key": "isPaid"
     }
   ],
   "type": "default"
