@@ -136,7 +136,10 @@
         "columns": null
       },
       "id": "Field_178975c",
-      "key": "isPaid"
+      "key": "isPaid",
+      "validate": {
+        "required": true
+      }
     }
   ],
   "type": "default"

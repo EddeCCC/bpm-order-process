@@ -44,7 +44,7 @@
       <bpmn:outgoing>Flow_0fbyuha</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_OrderCompleted" name="Order completed">
-      <bpmn:incoming>Flow_08dlzk8</bpmn:incoming>
+      <bpmn:incoming>Flow_0ok51u2</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_0nghy12" name="No" sourceRef="Gateway_ApproveResult" targetRef="EndEvent_OrderCancelled" />
     <bpmn:exclusiveGateway id="Gateway_1dbc216">
@@ -154,9 +154,52 @@
       <bpmn:incoming>Flow_0k2g63z</bpmn:incoming>
       <bpmn:outgoing>Flow_08dlzk8</bpmn:outgoing>
     </bpmn:sendTask>
-    <bpmn:sequenceFlow id="Flow_08dlzk8" sourceRef="Task_OrderItems" targetRef="EndEvent_OrderCompleted" />
+    <bpmn:sequenceFlow id="Flow_08dlzk8" sourceRef="Task_OrderItems" targetRef="Event_OrderStatusReceived" />
+    <bpmn:intermediateCatchEvent id="Event_OrderStatusReceived" name="Order status received">
+      <bpmn:incoming>Flow_08dlzk8</bpmn:incoming>
+      <bpmn:outgoing>Flow_16h91p2</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1nosy3l" messageRef="Message_17tbq3q" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:sequenceFlow id="Flow_16h91p2" sourceRef="Event_OrderStatusReceived" targetRef="Task_CreateMessage" />
+    <bpmn:sequenceFlow id="Flow_0ok51u2" sourceRef="Task_NotifyClient" targetRef="EndEvent_OrderCompleted" />
+    <bpmn:serviceTask id="Task_NotifyClient" name="Notify client" zeebe:modelerTemplate="io.camunda.connectors.SendGrid.v2" zeebe:modelerTemplateVersion="5" zeebe:modelerTemplateIcon="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICAgIDxwYXRoIGQ9Ik0wLjI4NTcwNiA1LjQwODQ3SDUuNDM4MzdWMTAuNTYxMUgwLjI4NTcwNlY1LjQwODQ3WiIgZmlsbD0id2hpdGUiLz4KICAgIDxwYXRoIGQ9Ik0wLjI4NTcwNiA1LjQwODQ3SDUuNDM4MzdWMTAuNTYxMUgwLjI4NTcwNlY1LjQwODQ3WiIgZmlsbD0iIzk5RTFGNCIvPgogICAgPHBhdGggZD0iTTUuNDM4MzcgMTAuNTYxMUwxMC41NjExIDEwLjU2MTZWMTUuNjg0NEg1LjQzODM3VjEwLjU2MTFaIiBmaWxsPSJ3aGl0ZSIvPgogICAgPHBhdGggZD0iTTUuNDM4MzcgMTAuNTYxMUwxMC41NjExIDEwLjU2MTZWMTUuNjg0NEg1LjQzODM3VjEwLjU2MTFaIiBmaWxsPSIjOTlFMUY0Ii8+CiAgICA8cGF0aCBkPSJNMC4yODU3MDYgMTUuNjg0Nkw1LjQzODM3IDE1LjY4NDRWMTUuNzE0M0gwLjI4NTcwNlYxNS42ODQ2Wk0wLjI4NTcwNiAxMC41NjE5SDUuNDM4MzdWMTUuNjg0NEwwLjI4NTcwNiAxNS42ODQ2VjEwLjU2MTlaIiBmaWxsPSIjMUE4MkUyIi8+CiAgICA8cGF0aCBkPSJNNS40MzgzNyAwLjI4NTcwNkgxMC41NjExVjUuNDA4NDdINS40MzgzN1YwLjI4NTcwNlpNMTAuNTYxNiA1LjQzODM3SDE1LjcxNDNWMTAuNTYxMUgxMC41NjE2VjUuNDM4MzdaIiBmaWxsPSIjMDBCM0UzIi8+CiAgICA8cGF0aCBkPSJNNS40MzgzNyAxMC41NjExTDEwLjU2MTEgMTAuNTYxNlY1LjQwODQ3SDUuNDM4MzdWMTAuNTYxMVoiIGZpbGw9IiMwMDlERDkiLz4KICAgIDxwYXRoIGQ9Ik0xMC41NjExIDAuMjg1NzA2SDE1LjcxNDNWNS40MDg0N0gxMC41NjExVjAuMjg1NzA2WiIgZmlsbD0iIzFBODJFMiIvPgogICAgPHBhdGggZD0iTTEwLjU2MTEgNS40MDg0N0gxNS43MTQzVjUuNDM4MzdIMTAuNTYxNkwxMC41NjExIDUuNDA4NDdaIiBmaWxsPSIjMUE4MkUyIi8+Cjwvc3ZnPg==">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="io.camunda:sendgrid:1" retries="3" />
+        <zeebe:ioMapping>
+          <zeebe:input source="{{secrets.SENDGRID_API_KEY}}" target="apiKey" />
+          <zeebe:input source="Demo Order Team" target="from.name" />
+          <zeebe:input source="{{secrets.EMAIL_ADDRESS}}" target="from.email" />
+          <zeebe:input source="=client.name" target="to.name" />
+          <zeebe:input source="=client.email" target="to.email" />
+          <zeebe:input source="mail" target="unMappedFieldNotUseInModel.mailType" />
+          <zeebe:input source="=&#34;Your order &#34; + orderId" target="content.subject" />
+          <zeebe:input source="text/plain" target="content.type" />
+          <zeebe:input source="=message" target="content.value" />
+        </zeebe:ioMapping>
+        <zeebe:taskHeaders>
+          <zeebe:header key="elementTemplateVersion" value="5" />
+          <zeebe:header key="elementTemplateId" value="io.camunda.connectors.SendGrid.v2" />
+          <zeebe:header key="retryBackoff" value="PT0S" />
+        </zeebe:taskHeaders>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_197pz7r</bpmn:incoming>
+      <bpmn:outgoing>Flow_0ok51u2</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_197pz7r" sourceRef="Task_CreateMessage" targetRef="Task_NotifyClient" />
+    <bpmn:scriptTask id="Task_CreateMessage" name="Create message">
+      <bpmn:extensionElements>
+        <zeebe:script expression="=if count(unavailable) = 0&#10;then&#10;  &#34;Dear &#34; + client.name + &#34;, we have received your request.\n&#34; +&#10;  &#34;Thank you for your order &#34; + string(orderId) + &#34;.\n\n&#34; +&#10;  &#34;All items are available and will be shipped soon.\n\n Regards, \nYour Order Team&#34;&#10;else&#10;  &#34;Dear &#34; + client.name + &#34;, we have received your request.\n&#34; +&#10;  &#34;Thank you for your order &#34; + string(orderId) + &#34;.\n\n&#34; +&#10;  &#34;Your order will be delayed by a few days, because the following items are not available: &#34; +&#10;  string join(unavailable, &#34;, &#34;) + &#34;.\n\n Regards, \nYour Order Team&#34;" resultVariable="message" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_16h91p2</bpmn:incoming>
+      <bpmn:outgoing>Flow_197pz7r</bpmn:outgoing>
+    </bpmn:scriptTask>
   </bpmn:process>
   <bpmn:message id="Message_3jsama3" name="Message_AbortOrder">
+    <bpmn:extensionElements>
+      <zeebe:subscription correlationKey="=orderId" />
+    </bpmn:extensionElements>
+  </bpmn:message>
+  <bpmn:message id="Message_17tbq3q" name="Message_OrderStatus">
     <bpmn:extensionElements>
       <zeebe:subscription correlationKey="=orderId" />
     </bpmn:extensionElements>
@@ -167,6 +210,12 @@
         <dc:Bounds x="-78" y="100" width="36" height="36" />
         <bpmndi:BPMNLabel>
           <dc:Bounds x="-95" y="143" width="73" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0zyra07_di" bpmnElement="EndEvent_OrderCancelled">
+        <dc:Bounds x="662" y="32" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="641" y="13" width="78" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1nkokpu_di" bpmnElement="Gateway_CheckOrderPrice" isMarkerVisible="true">
@@ -188,6 +237,12 @@
       <bpmndi:BPMNShape id="Activity_0d3x0nn_di" bpmnElement="Task_HandlePayment">
         <dc:Bounds x="630" y="160" width="100" height="80" />
         <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_02mgo0c_di" bpmnElement="EndEvent_OrderCompleted">
+        <dc:Bounds x="1582" y="182" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1559" y="158" width="82" height="14" />
+        </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_1dbc216_di" bpmnElement="Gateway_1dbc216" isMarkerVisible="true">
         <dc:Bounds x="515" y="175" width="50" height="50" />
@@ -218,22 +273,6 @@
           <dc:Bounds x="71" y="-38" width="58" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_0zyra07_di" bpmnElement="EndEvent_OrderCancelled">
-        <dc:Bounds x="662" y="32" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="641" y="13" width="78" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Event_02mgo0c_di" bpmnElement="EndEvent_OrderCompleted">
-        <dc:Bounds x="1192" y="182" width="36" height="36" />
-        <bpmndi:BPMNLabel>
-          <dc:Bounds x="1169" y="158" width="82" height="14" />
-        </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_04kac2x_di" bpmnElement="Task_OrderItems">
-        <dc:Bounds x="1040" y="160" width="100" height="80" />
-        <bpmndi:BPMNLabel />
-      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1wnlend_di" bpmnElement="Activity_1joysbo" isExpanded="true">
         <dc:Bounds x="280" y="300" width="260" height="130" />
       </bpmndi:BPMNShape>
@@ -259,6 +298,23 @@
       <bpmndi:BPMNShape id="Activity_1x2isvr_di" bpmnElement="Task_CreateInvoice">
         <dc:Bounds x="880" y="160" width="100" height="80" />
         <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_04kac2x_di" bpmnElement="Task_OrderItems">
+        <dc:Bounds x="1040" y="160" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1cn0122_di" bpmnElement="Event_OrderStatusReceived">
+        <dc:Bounds x="1192" y="182" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1179" y="225" width="64" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1q3taxn_di" bpmnElement="Task_NotifyClient">
+        <dc:Bounds x="1430" y="160" width="100" height="80" />
+        <bpmndi:BPMNLabel />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0gvy0nz_di" bpmnElement="Task_CreateMessage">
+        <dc:Bounds x="1280" y="160" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_0c16l27_di" bpmnElement="Event_0c16l27">
         <dc:Bounds x="82" y="60" width="36" height="36" />
@@ -360,6 +416,18 @@
       <bpmndi:BPMNEdge id="Flow_08dlzk8_di" bpmnElement="Flow_08dlzk8">
         <di:waypoint x="1140" y="200" />
         <di:waypoint x="1192" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_16h91p2_di" bpmnElement="Flow_16h91p2">
+        <di:waypoint x="1228" y="200" />
+        <di:waypoint x="1280" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0ok51u2_di" bpmnElement="Flow_0ok51u2">
+        <di:waypoint x="1530" y="200" />
+        <di:waypoint x="1582" y="200" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_197pz7r_di" bpmnElement="Flow_197pz7r">
+        <di:waypoint x="1380" y="200" />
+        <di:waypoint x="1430" y="200" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

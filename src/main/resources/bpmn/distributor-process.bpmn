@@ -19,22 +19,25 @@
       <bpmn:outgoing>Flow_18vq945</bpmn:outgoing>
     </bpmn:serviceTask>
     <bpmn:endEvent id="EndEvent_ItemOrderCompleted" name="Item order completed">
-      <bpmn:incoming>Flow_03u0gg3</bpmn:incoming>
+      <bpmn:incoming>Flow_19ulsiz</bpmn:incoming>
     </bpmn:endEvent>
     <bpmn:sequenceFlow id="Flow_18vq945" sourceRef="Task_CheckInventory" targetRef="Gateway_ItemsAvailable" />
-    <bpmn:exclusiveGateway id="Gateway_ItemsAvailable" name="Items available?" default="Flow_0kvr792">
+    <bpmn:exclusiveGateway id="Gateway_ItemsAvailable" name="Ordered items available?" default="Flow_0rmdjra">
       <bpmn:incoming>Flow_18vq945</bpmn:incoming>
       <bpmn:outgoing>Flow_0kvr792</bpmn:outgoing>
       <bpmn:outgoing>Flow_0rmdjra</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_0kvr792" name="Yes" sourceRef="Gateway_ItemsAvailable" targetRef="Gateway_09s07iq" />
-    <bpmn:sequenceFlow id="Flow_0rmdjra" name="No" sourceRef="Gateway_ItemsAvailable" targetRef="Task_ApproveReorder">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=not(isAvailable)</bpmn:conditionExpression>
+    <bpmn:sequenceFlow id="Flow_0kvr792" name="Yes" sourceRef="Gateway_ItemsAvailable" targetRef="Gateway_09s07iq">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">=is empty(unavailable)</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_0rmdjra" name="No" sourceRef="Gateway_ItemsAvailable" targetRef="Task_ApproveReorder" />
     <bpmn:userTask id="Task_ApproveReorder" name="Approve reorder">
       <bpmn:extensionElements>
         <zeebe:userTask />
         <zeebe:formDefinition formId="Form_ApproveReorder" />
+        <zeebe:ioMapping>
+          <zeebe:input source="=for item in items return&#10;  { &#34;name&#34;: item.name,&#10;    &#34;unitPrice&#34;: item.unitPrice,&#10;    &#34;quantity&#34;: item.quantity,&#10;    &#34;requiresReorder&#34;: list contains(unavailable, item.name) }" target="reorderItems" />
+        </zeebe:ioMapping>
       </bpmn:extensionElements>
       <bpmn:incoming>Flow_0rmdjra</bpmn:incoming>
       <bpmn:outgoing>Flow_06ten3g</bpmn:outgoing>
@@ -44,8 +47,16 @@
       <bpmn:incoming>Flow_06ten3g</bpmn:incoming>
       <bpmn:outgoing>Flow_03u0gg3</bpmn:outgoing>
     </bpmn:exclusiveGateway>
-    <bpmn:sequenceFlow id="Flow_03u0gg3" sourceRef="Gateway_09s07iq" targetRef="EndEvent_ItemOrderCompleted" />
+    <bpmn:sequenceFlow id="Flow_03u0gg3" sourceRef="Gateway_09s07iq" targetRef="Task_SendOrderStatus" />
     <bpmn:sequenceFlow id="Flow_06ten3g" sourceRef="Task_ApproveReorder" targetRef="Gateway_09s07iq" />
+    <bpmn:sequenceFlow id="Flow_19ulsiz" sourceRef="Task_SendOrderStatus" targetRef="EndEvent_ItemOrderCompleted" />
+    <bpmn:sendTask id="Task_SendOrderStatus" name="Send order status">
+      <bpmn:extensionElements>
+        <zeebe:taskDefinition type="sendOrderStatus" />
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_03u0gg3</bpmn:incoming>
+      <bpmn:outgoing>Flow_19ulsiz</bpmn:outgoing>
+    </bpmn:sendTask>
   </bpmn:process>
   <bpmn:message id="Message_075l24t" name="Message_OrderItems" />
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
@@ -61,15 +72,15 @@
         <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Event_088fkm9_di" bpmnElement="EndEvent_ItemOrderCompleted">
-        <dc:Bounds x="812" y="100" width="36" height="36" />
+        <dc:Bounds x="932" y="100" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="804" y="143" width="54" height="27" />
+          <dc:Bounds x="924" y="143" width="54" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_02s83uz_di" bpmnElement="Gateway_ItemsAvailable" isMarkerVisible="true">
         <dc:Bounds x="435" y="93" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="420" y="69" width="80" height="14" />
+          <dc:Bounds x="423" y="66" width="73" height="27" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_1930lvo_di" bpmnElement="Task_ApproveReorder">
@@ -78,6 +89,10 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_09s07iq_di" bpmnElement="Gateway_09s07iq" isMarkerVisible="true">
         <dc:Bounds x="665" y="93" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0fox95s_di" bpmnElement="Task_SendOrderStatus">
+        <dc:Bounds x="770" y="78" width="100" height="80" />
+        <bpmndi:BPMNLabel />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1rvcmhh_di" bpmnElement="Flow_1rvcmhh">
         <di:waypoint x="186" y="118" />
@@ -104,12 +119,16 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_03u0gg3_di" bpmnElement="Flow_03u0gg3">
         <di:waypoint x="715" y="118" />
-        <di:waypoint x="812" y="118" />
+        <di:waypoint x="770" y="118" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_06ten3g_di" bpmnElement="Flow_06ten3g">
         <di:waypoint x="630" y="220" />
         <di:waypoint x="690" y="220" />
         <di:waypoint x="690" y="143" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_19ulsiz_di" bpmnElement="Flow_19ulsiz">
+        <di:waypoint x="870" y="118" />
+        <di:waypoint x="932" y="118" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>

@@ -43,6 +43,17 @@
           "readonly": true
         },
         {
+          "label": "Reorder required",
+          "type": "checkbox",
+          "layout": {
+            "row": "Row_0r8veiv",
+            "columns": null
+          },
+          "id": "Field_1srojwx",
+          "key": "requiresReorder",
+          "readonly": true
+        },
+        {
           "label": "Unit Price",
           "type": "number",
           "layout": {
@@ -75,7 +86,7 @@
         "columns": null
       },
       "id": "Field_1k928us",
-      "path": "items"
+      "path": "reorderItems"
     },
     {
       "label": "Approve reorder",
@@ -85,7 +96,10 @@
         "columns": null
       },
       "id": "Field_0ouew7w",
-      "key": "reorderApproved"
+      "key": "reorderApproved",
+      "validate": {
+        "required": true
+      }
     }
   ],
   "type": "default"
