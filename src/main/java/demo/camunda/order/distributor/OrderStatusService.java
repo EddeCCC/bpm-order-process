@@ -9,24 +9,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
-public class OrderItemsService {
-    private static final Logger log = LoggerFactory.getLogger(OrderItemsService.class);
+public class OrderStatusService {
+    private static final Logger log = LoggerFactory.getLogger(OrderStatusService.class);
 
-    private static final String ORDER_MESSAGE = "Message_OrderItems";
+    private static final String ORDER_MESSAGE = "Message_OrderStatus";
 
     @Autowired
     private CamundaClient client;
 
-    @JobWorker(type = "orderItems", fetchVariables = {"orderId", "items"})
+    @JobWorker(type = "sendOrderStatus")
     public void handleJob(final ActivatedJob job) {
         String orderId = String.valueOf(job.getVariable("orderId"));
 
-        log.info("Ordering required items for {} ", orderId);
+        Map<String, Object> outputVars = Map.of(
+                "orderId", orderId,
+                "items", job.getVariable("items"),
+                "unavailable", job.getVariable("unavailable")
+        );
 
-        Map<String, Object> outputVars = new HashMap<>(job.getVariablesAsMap());
+        log.info("Sending order status for {}", orderId);
 
         client.newPublishMessageCommand()
                 .messageName(ORDER_MESSAGE)

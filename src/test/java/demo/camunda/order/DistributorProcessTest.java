@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -29,17 +30,17 @@ public class DistributorProcessTest {
             Map.of("name", "productA", "unitPrice", "100", "quantity", "2"),
             Map.of("name", "productB", "unitPrice", "200", "quantity", "1")
     );
-    private final Map<String, Object> startVars = Map.of(
-            "orderId", orderId, "items", items
-    );
+    private final Map<String, Object> startVars = Map.of("orderId", orderId, "items", items);
 
     @DisplayName("Ordered items available")
     @Test
     void testHappyPath() {
         startProcess();
 
-        Map<String, Object> variables = Map.of("isAvailable", true);
+        Map<String, Object> variables = Map.of("unavailable", Collections.emptyList());
         processTestContext.mockJobWorker("checkInventory").thenComplete(variables);
+
+        processTestContext.mockJobWorker("sendOrderStatus").thenComplete();
 
         CamundaAssert.assertThatProcessInstance(byProcessId(PROCESS_ID)).isCompleted();
     }
@@ -49,12 +50,10 @@ public class DistributorProcessTest {
     void testItemsNotAvailable() {
         startProcess();
 
-        Map<String, Object> variables = Map.of("isAvailable", false);
+        Map<String, Object> variables = Map.of("unavailable", List.of("product"));
         processTestContext.mockJobWorker("checkInventory").thenComplete(variables);
 
-        processTestContext.completeUserTask("Task_ApproveReorder");
-
-        CamundaAssert.assertThatProcessInstance(byProcessId(PROCESS_ID)).isCompleted();
+        CamundaAssert.assertThat(byProcessId(PROCESS_ID)).hasActiveElements("Task_ApproveReorder");
     }
 
     private PublishMessageResponse startProcess() {

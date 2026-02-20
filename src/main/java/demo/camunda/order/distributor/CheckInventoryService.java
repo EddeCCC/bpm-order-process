@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,14 +26,27 @@ public class CheckInventoryService {
 
         log.info("Checking inventory for order {}: {}", orderId, items);
 
-        boolean isAvailable = isAvailable();
+        List<String> unavailableItems = getUnavailableItems(items);
+        Map<String, Object> outputVars = Map.of("unavailable", unavailableItems);
 
         client.newCompleteCommand(job)
-                .variable("isAvailable", isAvailable)
+                .variables(outputVars)
                 .send().join();
     }
 
-    private boolean isAvailable() {
+    private List<String> getUnavailableItems(List<Map<String,Object>> items) {
+        List<String> unavailableItems = new LinkedList<>();
+        for (Map<String, Object> item : items) {
+            if(isUnavailable()) {
+                String name = String.valueOf(item.get("name"));
+                unavailableItems.add(name);
+            }
+        }
+        log.info("Unavailable items: {}", unavailableItems);
+        return unavailableItems;
+    }
+
+    private boolean isUnavailable() {
         return Math.random() < 0.5;
     }
 }

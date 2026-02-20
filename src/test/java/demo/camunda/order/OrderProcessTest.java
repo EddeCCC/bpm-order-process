@@ -57,11 +57,23 @@ public class OrderProcessTest {
         // Order items
         processTestContext.mockJobWorker("orderItems").thenComplete();
 
+        // Receive order status
+        client.newPublishMessageCommand()
+                .messageName("Message_OrderStatus")
+                .correlationKey(orderId)
+                .send().join();
+
+        // Send email
+        // jobType extracted from the BPMN file
+        processTestContext.mockJobWorker("io.camunda:sendgrid:1").thenComplete();
+
         CamundaAssert.assertThat(processInstance).hasCompletedElementsInOrder(
                 "Task_CreateOrder",
                 "Task_HandlePayment",
                 "Task_CreateInvoice",
-                "Task_OrderItems"
+                "Task_OrderItems",
+                "Task_CreateMessage",
+                "Task_NotifyClient"
         );
         CamundaAssert.assertThat(processInstance).isCompleted();
     }

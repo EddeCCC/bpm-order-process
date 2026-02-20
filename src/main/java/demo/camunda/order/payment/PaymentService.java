@@ -3,7 +3,6 @@ package demo.camunda.order.payment;
 import io.camunda.client.CamundaClient;
 import io.camunda.client.annotation.JobWorker;
 import io.camunda.client.api.response.ActivatedJob;
-import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,7 @@ public class PaymentService {
 
         try {
             service();
+            log.info("Payment successful");
         } catch (Exception e) {
             client.newThrowErrorCommand(job).errorCode(ERROR_CODE).send().join();
         }
