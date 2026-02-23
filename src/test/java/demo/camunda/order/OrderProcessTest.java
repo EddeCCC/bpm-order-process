@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.Map;
 
 @SpringBootTest(properties = {"camunda.client.worker.defaults.enabled=false"})
@@ -40,13 +41,11 @@ public class OrderProcessTest {
     @DisplayName("Order completed successfully")
     @Test
     void testHappyPath() {
-        // Start process
-        ProcessInstanceEvent processInstance = startInstance(startVars);
-        CamundaAssert.assertThat(processInstance).hasActiveElements("Task_CreateOrder");
+        Map<String, Object> input = new HashMap<>(startVars);
+        input.put("orderVolume", 50);
 
-        // Complete user task
-        Map<String, Object> userTaskVars = Map.of("orderVolume", 50);
-        processTestContext.completeUserTask("Task_CreateOrder", userTaskVars);
+        // Start process
+        ProcessInstanceEvent processInstance = startInstance(input);
 
         // Handle payment
         processTestContext.mockJobWorker("handlePayment").thenComplete();
@@ -71,7 +70,6 @@ public class OrderProcessTest {
         processTestContext.mockJobWorker("io.camunda:sendgrid:1").thenComplete();
 
         CamundaAssert.assertThat(processInstance).hasCompletedElementsInOrder(
-                "Task_CreateOrder",
                 "Task_HandlePayment",
                 "Task_CreateInvoice",
                 "Task_OrderItems",
@@ -84,13 +82,11 @@ public class OrderProcessTest {
     @DisplayName("Large order volume has to be approved")
     @Test
     void testLargeOrderVolume() {
-        // Start process
-        ProcessInstanceEvent processInstance = startInstance(startVars);
-        CamundaAssert.assertThat(processInstance).hasActiveElements("Task_CreateOrder");
+        Map<String, Object> input = new HashMap<>(startVars);
+        input.put("orderVolume", 1000);
 
-        // Complete user task
-        Map<String, Object> userTaskVars = Map.of("orderVolume", 1000);
-        processTestContext.completeUserTask("Task_CreateOrder", userTaskVars);
+        // Start process
+        ProcessInstanceEvent processInstance = startInstance(input);
 
         CamundaAssert.assertThat(processInstance).hasActiveElements("Task_ApproveOrder");
     }
@@ -146,19 +142,7 @@ public class OrderProcessTest {
         CamundaAssert.assertThat(processInstance).isCompleted();
     }
 
-    @DisplayName("Abort create-order after timeout")
-    @Test
-    void testAbortCreateOrder() {
-        ProcessInstanceEvent processInstance = startInstance(startVars);
-        CamundaAssert.assertThat(processInstance).hasActiveElements("Task_CreateOrder");
-
-        processTestContext.increaseTime(Duration.ofMinutes(3));
-
-        CamundaAssert.assertThat(processInstance)
-                .hasActiveElements("Event_CreateOrder_AbortOrder");
-    }
-
-    @DisplayName("Abort approve-oder after timeout")
+    @DisplayName("Abort approve-order after timeout")
     @Test
     void testAbortApproveOrder() {
         ProcessInstanceEvent processInstance = startInstanceBefore(startVars, "Task_ApproveOrder");
