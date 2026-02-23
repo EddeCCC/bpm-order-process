@@ -63,6 +63,9 @@ public class OrderProcessTest {
                 .correlationKey(orderId)
                 .send().join();
 
+        // Generate email
+        processTestContext.mockJobWorker("io.camunda:http-json:1").thenComplete();
+
         // Send email
         // jobType extracted from the BPMN file
         processTestContext.mockJobWorker("io.camunda:sendgrid:1").thenComplete();
@@ -72,8 +75,8 @@ public class OrderProcessTest {
                 "Task_HandlePayment",
                 "Task_CreateInvoice",
                 "Task_OrderItems",
-                "Task_CreateMessage",
-                "Task_NotifyClient"
+                "Task_GenerateEmail",
+                "Task_SendEmail"
         );
         CamundaAssert.assertThat(processInstance).isCompleted();
     }
