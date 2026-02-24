@@ -7,4 +7,7 @@ Demo application for Camunda 8
 
 Add cluster information in `cluster.yml`.
 
-Start the application with this additional option: `-Dspring.config.additional-location=cluster.yml`
+After that, start the app from project root via
+
+`./mvnw spring-boot:run` or
+`./mvnw.cmd spring-boot:run` (Windows)

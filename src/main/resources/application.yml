@@ -1,2 +1,5 @@
 spring:
   application.name: bpm-order-process
+
+  config:
+    import: "file:./cluster.yml"
