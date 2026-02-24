@@ -88,16 +88,16 @@ public class OrderProcessTest {
         // Start process
         ProcessInstanceEvent processInstance = startInstance(input);
 
-        CamundaAssert.assertThat(processInstance).hasActiveElements("Task_ApproveOrder");
+        CamundaAssert.assertThat(processInstance).hasActiveElements("Task_ApproveOrderAI");
     }
 
     @DisplayName("Order not approved")
     @Test
     void testOrderNotApproved() {
-        ProcessInstanceEvent processInstance = startInstanceBefore(startVars, "Task_ApproveOrder");
+        ProcessInstanceEvent processInstance = startInstanceBefore(startVars, "Task_ApproveOrderAI");
 
-        Map<String, Object> userTaskVars = Map.of("isApproved", false);
-        processTestContext.completeUserTask("Task_ApproveOrder", userTaskVars);
+        Map<String, Object> variables = Map.of("approval", Map.of("isApproved", false));
+        processTestContext.mockJobWorker("io.camunda.agenticai:aiagent:1").thenComplete(variables);
 
         CamundaAssert.assertThat(processInstance)
                 .hasCompletedElement("EndEvent_OrderCancelled", 1);
@@ -107,10 +107,10 @@ public class OrderProcessTest {
     @DisplayName("Order manually approved")
     @Test
     void testOrderApproved() {
-        ProcessInstanceEvent processInstance = startInstanceBefore(startVars, "Task_ApproveOrder");
+        ProcessInstanceEvent processInstance = startInstanceBefore(startVars, "Task_ApproveOrderAI");
 
-        Map<String, Object> userTaskVars = Map.of("isApproved", true);
-        processTestContext.completeUserTask("Task_ApproveOrder", userTaskVars);
+        Map<String, Object> variables = Map.of("approval", Map.of("isApproved", true));
+        processTestContext.mockJobWorker("io.camunda.agenticai:aiagent:1").thenComplete(variables);
 
         CamundaAssert.assertThat(processInstance).hasActiveElements("Task_HandlePayment");
     }
@@ -140,17 +140,6 @@ public class OrderProcessTest {
         CamundaAssert.assertThat(processInstance)
                 .hasCompletedElement("EndEvent_OrderAborted_OrderCancelled", 1);
         CamundaAssert.assertThat(processInstance).isCompleted();
-    }
-
-    @DisplayName("Abort approve-order after timeout")
-    @Test
-    void testAbortApproveOrder() {
-        ProcessInstanceEvent processInstance = startInstanceBefore(startVars, "Task_ApproveOrder");
-
-        processTestContext.increaseTime(Duration.ofMinutes(2));
-
-        CamundaAssert.assertThat(processInstance)
-                .hasActiveElements("Event_ApproveOrder_AbortOrder");
     }
 
     @DisplayName("Abort manually-handle-payment after timeout")
