@@ -1,4 +1,4 @@
-package demo.camunda.order;
+package demo.camunda;
 
 import io.camunda.client.annotation.Deployment;
 import org.springframework.boot.SpringApplication;

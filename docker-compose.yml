@@ -1,0 +1,8 @@
+services:
+  prometheus:
+    image: prom/prometheus:v3.9.1
+    container_name: camunda-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
