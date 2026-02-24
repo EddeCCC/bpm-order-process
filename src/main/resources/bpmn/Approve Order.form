@@ -118,24 +118,37 @@
       "path": "items"
     },
     {
-      "label": "Approve Order (or leave empty)",
-      "type": "checkbox",
+      "label": "Approval",
+      "components": [
+        {
+          "label": "Approve Order (or leave empty)",
+          "type": "checkbox",
+          "layout": {
+            "row": "Row_0lws5tb",
+            "columns": null
+          },
+          "id": "Field_178975c",
+          "key": "isApproved"
+        },
+        {
+          "label": "Comment",
+          "type": "textarea",
+          "layout": {
+            "row": "Row_1nufxl0",
+            "columns": null
+          },
+          "id": "Field_0882mi6",
+          "key": "comment"
+        }
+      ],
+      "showOutline": true,
+      "type": "group",
       "layout": {
         "row": "Row_03w1aqr",
         "columns": null
       },
-      "id": "Field_178975c",
-      "key": "isApproved"
-    },
-    {
-      "label": "Comment",
-      "type": "textarea",
-      "layout": {
-        "row": "Row_016s5jk",
-        "columns": null
-      },
-      "id": "Field_0882mi6",
-      "key": "comment"
+      "id": "Field_0wirlko",
+      "path": "approval"
     }
   ],
   "type": "default"

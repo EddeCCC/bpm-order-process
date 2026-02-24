@@ -125,7 +125,7 @@
         "columns": null
       },
       "id": "Field_0hpkd1j",
-      "key": "comment",
+      "key": "approval.comment",
       "readonly": true
     },
     {
